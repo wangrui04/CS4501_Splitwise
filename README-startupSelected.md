@@ -1,20 +1,25 @@
-# Selected Startup: TonePerfect for English Pronunciation
+# Selected Startup Idea: Splitwise with a Conversational Expense Assistant
 
 ## Overview
 
-TonePerfect for English is an AI pronunciation tutor designed for people learning English as a second language.
+Splitwise is an application for tracking shared expenses and who owes whom.
 
-Users record themselves saying a word, sentence, or short passage.
+Our project recreates its core expense-tracking functionality and adds an AI assistant that lets users describe complicated splits through text or voice.
 
-The system analyzes their speech and gives specific feedback about:
+For example:
 
-- Individual sounds.
-- Stress.
-- Rhythm.
-- Pronunciation patterns.
-- Recurring mistakes.
+> “Anna and I shared the nachos, and everyone but Aly got a margarita.”
 
-It then generates personalized practice exercises.
+The system identifies:
+
+- Who paid.
+- Which items were purchased.
+- How much each item cost.
+- Who shared each item.
+- Exceptions and unequal portions.
+- Missing information that requires clarification.
+
+It then generates an itemized preview for users to confirm before updating balances.
 
 ---
 
@@ -22,11 +27,11 @@ It then generates personalized practice exercises.
 
 The startup focuses specifically on:
 
-**Helping English learners improve their pronunciation.**
+**Helping groups divide shared expenses accurately without manually calculating each person’s share.**
 
-It does not try to teach every part of English.
+Users explain who shared what instead of converting a complicated situation into percentages or custom amounts themselves.
 
-Instead, it specializes in identifying pronunciation problems and helping users practice those exact problems.
+The application tracks expenses and balances. Actual payment processing is outside the MVP.
 
 ---
 
@@ -34,13 +39,15 @@ Instead, it specializes in identifying pronunciation problems and helping users 
 
 Target users include:
 
-- International students.
-- ESL learners.
-- Immigrants.
-- Non-native English speakers.
-- Students preparing for interviews or presentations.
+- College roommates.
+- Friends splitting restaurant bills.
+- Students traveling together.
+- Groups sharing groceries or household purchases.
+- Clubs organizing shared purchases.
 
-University campuses provide direct access to a large population of potential users.
+University campuses provide direct access to people who regularly share expenses.
+
+We can test the application with classmates, roommates, and student organizations using realistic expense-splitting scenarios.
 
 ---
 
@@ -49,111 +56,150 @@ University campuses provide direct access to a large population of potential use
 The MVP could use:
 
 - React frontend.
-- Browser microphone recording.
 - Python backend.
-- Speech-to-text model/API.
-- Speech or phoneme analysis.
+- Database for groups, members, expenses, and balances.
 - LLM API.
-- Text-to-speech API.
+- Structured JSON output for expense details.
+- Regular application code for arithmetic and balance calculations.
+- Speech-to-text API for optional voice input.
 
-Existing speech APIs make the infrastructure realistic for a small team to build.
+We would first build a text-based workflow, then add voice input after the core functionality works.
+
+This keeps the infrastructure realistic for a small team to build.
 
 ---
 
 ## 4. Reimagines the Problem Space
 
-Many language-learning applications simply tell users:
+Manual expense entry requires users to select participants and calculate custom allocations for complicated splits.
 
-> “Correct.”
+Our application instead lets users explain the expense as they would to a friend.
 
-or
-
-> “Try again.”
-
-Our application instead follows:
+The application follows:
 
 ```text
-Speak
+Describe Expense
   ↓
-Analyze
+Identify Items and Participants
   ↓
-Identify Specific Error
+Ask for Missing Information
   ↓
-Explain Error
+Calculate Each Person’s Share
   ↓
-Generate Targeted Practice
+Validate the Allocation
   ↓
-Speak Again
+Show Itemized Preview
+  ↓
+User Confirms
+  ↓
+Save Expense and Update Balances
 ```
 
-The system therefore acts more like a pronunciation coach than a basic speech-recognition exercise.
+Users can also make conversational corrections:
+
+> “Actually, Anna had two margaritas.”
+
+The assistant updates the proposed allocation and shows a revised preview before saving.
 
 ---
 
 ## 5. An LLM / Generative Model Is Core to the Solution
 
-Speech-analysis models detect pronunciation differences, while the LLM converts those results into personalized tutoring.
+The LLM converts natural-language descriptions into structured expense information.
+
+It interprets references such as:
+
+- “Anna and I.”
+- “Everyone except Aly.”
+- “Just the roommates.”
+- “Anna had two, and I had one.”
 
 For example:
 
+> “I paid $20 total, including tax and tip, for nachos that Anna and I shared.”
+
+If the signed-in user is Sarah, the LLM could produce:
+
 ```json
 {
-  "target_word": "three",
-  "expected_phoneme": "θ",
-  "observed_sound": "s",
-  "confidence": 0.93
+  "payer": "Sarah",
+  "currency": "USD",
+  "items": [
+    {
+      "description": "Nachos",
+      "amount_cents": 2000,
+      "participants": ["Sarah", "Anna"],
+      "split_method": "equal"
+    }
+  ],
+  "tax_and_tip_included": true,
+  "missing_fields": []
 }
 ```
 
-The LLM can then generate:
+If information is missing, the assistant asks questions such as:
 
-- A simple explanation.
-- Mouth/tongue-position guidance.
-- Relevant practice words.
-- Minimal pairs where appropriate.
-- Personalized practice sentences.
+- “How much were the nachos and each margarita?”
+- “Who paid?”
+- “Does that amount include tax and tip?”
+- “How should tax and tip be divided?”
 
-The LLM therefore creates individualized lessons from the learner's actual pronunciation problems.
+Regular application code calculates the final shares.
+
+The LLM therefore provides the conversational understanding, while deterministic code handles the arithmetic.
 
 ---
 
 ## 6. Validation Guardrail
 
-No generated pronunciation lesson reaches the learner before validation.
+No AI-generated expense allocation is saved before validation and user confirmation.
 
 Validators check:
 
-- Speech transcription matches the expected phrase.
-- Error confidence is sufficiently high.
-- IPA symbols are valid.
-- Example words contain the targeted sound.
-- Minimal pairs are valid.
-- Practice sentences contain the required target sounds.
-- The system does not claim an error if speech confidence is too low.
+- The structured response follows the required schema.
+- Every payer and participant belongs to the selected group.
+- Required amounts, currency, and payer information are present.
+- Item amounts and quantities are valid.
+- Split rules are supported and internally consistent.
+- Tax and tip handling has been specified.
+- Calculated shares add up to the confirmed expense total.
+- Rounding does not create or lose money.
+- Unresolved ambiguity triggers a follow-up question.
 
-This prevents the LLM from inventing pronunciation mistakes or generating incorrect exercises.
+For example, the assistant must ask who “Alex” refers to if multiple group members have that name.
+
+This prevents invalid allocations from silently changing balances.
+
+Users also review the interpretation because correct arithmetic does not necessarily mean the assistant understood their description correctly.
 
 ---
 
 ## 7. Self-Correction Loop
 
-If generated feedback contains an error, the validator sends the problem back to the LLM.
+If the generated expense structure fails validation, the validator sends the specific problem back to the LLM.
 
 Example:
 
 ```text
 Validation Error:
 
-The practice word "sink" does not contain
-the target phoneme /θ/.
+The participant "Allie" is not in this group.
+Valid members are Sarah, Anna, Aly, and Ben.
 
-Generate a new practice list using words
-that contain /θ/.
+Recheck the original description and use an existing
+member only if the reference is unambiguous.
+Otherwise, ask the user to clarify.
 ```
 
-The LLM regenerates the exercise automatically.
+The LLM revises the structure or asks a follow-up question when information is missing.
 
-Only validated feedback is presented to the user.
+The application recalculates and validates the revised allocation.
+
+Automatic retries are limited. If validation still fails, the assistant requests clarification or lets the user edit the expense manually.
+
+Only a validated preview reaches the confirmation step.
+
+Balances update only after the user approves the expense.
 
 ---
 
@@ -161,19 +207,29 @@ Only validated feedback is presented to the user.
 
 A first version could focus only on:
 
-- American English.
-- Common pronunciation errors.
-- Individual words and short sentences.
+- Small groups of friends or roommates.
+- One currency per group.
+- One payer per expense.
+- Equal and custom item-level splits.
+- Text-based expense descriptions.
+- Explicit tax and tip allocation rules.
 
 The deployed system could include:
 
-- Browser audio recording.
-- Speech recognition.
-- Phoneme analysis.
-- AI-generated tutoring.
+- Group creation and member management.
+- Manual expense entry.
+- AI-generated expense drafts.
+- Follow-up questions for missing information.
+- Conversational corrections.
+- Share and balance calculations.
 - Validation.
 - Automatic retry.
-- User pronunciation history.
+- An itemized review and confirmation screen.
+- Expense history and individual balances.
+- Recording settlements without transferring money.
+
+Voice input could be added once the text workflow works reliably.
+
+No bank connections, actual payments, or receipt scanning are required.
 
 This represents a realistic and fully deployable MVP.
-
