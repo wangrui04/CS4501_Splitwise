@@ -228,7 +228,8 @@ As a user, I want the AI assistant to recognize missing or ambiguous information
 
 ---
 
-## User Story 6: Conversational Corrections and Self-Correction
+
+## User Story 6: Handling Spelling Errors and Unclear Instructions
 
 **Priority:** P0  
 **Difficulty:** Worst-case  
@@ -236,51 +237,70 @@ As a user, I want the AI assistant to recognize missing or ambiguous information
 
 ### User Story
 
-As a user, I want to correct the AI's interpretation through natural language so that I can fix mistakes without restarting the expense entry process.
+As a user, I want the AI assistant to understand spelling mistakes
+and clarify unclear instructions so that I can describe expenses
+naturally without needing to phrase everything perfectly.
 
 ### Acceptance Criteria
 
-- [ ] The AI can interpret conversational corrections to quantities, prices, or participants.
-- [ ] Previously provided details are retained unless explicitly changed.
-- [ ] The AI recalculates affected shares after each correction.
-- [ ] The AI validates that all participants exist in the group.
-- [ ] The AI validates that individual shares add up to the total expense.
-- [ ] The user can review the revised breakdown before saving.
-- [ ] The corrected split is generated within 5 total user prompts.
-- [ ] If the assistant cannot resolve the expense, it asks for clarification rather than saving an incorrect allocation.
+- [ ] The AI recognizes common spelling errors in item names
+      and expense descriptions.
+- [ ] The AI correctly interprets misspelled group member names
+      when the intended person is unambiguous.
+- [ ] The AI identifies unclear or contradictory splitting
+      instructions.
+- [ ] The AI asks clarification questions instead of making
+      assumptions when the intended meaning is uncertain.
+- [ ] The AI retains previously provided information after
+      receiving clarification.
+- [ ] The AI correctly allocates expenses based on the
+      clarified instructions.
+- [ ] The AI produces an accurate split within 5 user prompts.
+- [ ] The final allocation is validated and displayed for
+      user confirmation before saving.
 
 ### Test Scenario
 
 **Prompt 1:**
 
-"I paid for three $8 drinks. Sarah, Kayla, and Rui each had one."
+"I paid for dinr. Me and Kayla shared nachoes for $16.
+Riu got 2 drnks for $5 each. Split the rest evenly."
 
-**Initial Expected Allocation:**
+**Expected AI Behavior:**
 
-| Person | Share |
-|---|---:|
-| Sarah | $8.00 |
-| Kayla | $8.00 |
-| Rui | $8.00 |
-| **Total** | **$24.00** |
+- Recognizes "dinr" as "dinner".
+- Recognizes "nachoes" as "nachos".
+- Recognizes "Riu" as "Rui".
+- Recognizes "drnks" as "drinks".
+- Identifies that "split the rest evenly" is unclear
+  because no additional amount has been specified.
+- Asks for clarification instead of assuming what
+  "the rest" refers to.
+
+**Expected AI Follow-Up:**
+
+"I understand that Sarah and Kayla shared $16 nachos,
+and Rui had two $5 drinks. When you say 'split the rest
+evenly,' is there another charge to split?"
 
 **Prompt 2:**
 
-"Actually, Kayla had two drinks and Rui didn't have any."
+"No, that's everything. No tax or tip."
 
-**Expected Revised Allocation:**
+**Expected Result:**
 
-| Person | Share |
-|---|---:|
-| Sarah | $8.00 |
-| Kayla | $16.00 |
-| Rui | $0.00 |
-| **Total** | **$24.00** |
+| Person | Items | Share |
+|---|---|---:|
+| Sarah | Half of nachos | $8.00 |
+| Kayla | Half of nachos | $8.00 |
+| Rui | Two drinks | $10.00 |
+| **Total** | | **$26.00** |
 
 - Payer: Sarah
 - Expected user prompts: 2
-- Expected behavior: The AI updates the existing expense draft without creating a duplicate expense.
-- The updated preview must be displayed before confirmation.
+- Expected behavior: The AI interprets the spelling
+  mistakes correctly, clarifies the ambiguous
+  instruction, and generates the correct split.
 
 ---
 
