@@ -3,7 +3,9 @@
 
 ## Core Hypothesis
 
-The AI expense assistant can generate an accurate expense split within **5 user prompts at least 90% of the time**.
+Our AI expense assistant can generate an accurate expense
+split within 5 user prompts in at least 90% of test attempts,
+across varying levels of complexity.
 
 ### Validation Criteria
 
