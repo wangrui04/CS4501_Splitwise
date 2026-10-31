@@ -200,7 +200,9 @@ def test_protected_groups_require_login(client):
     assert response.status_code == 401
 
 
+
 def test_tampered_session_rejected(client):
+    # Log in to obtain a valid session cookie.
     response = client.post(
         "/api/session", json={"name": "Sarah"}
     )
@@ -209,10 +211,21 @@ def test_tampered_session_rejected(client):
     cookie_name = next(iter(client.cookies.keys()))
     original = client.cookies[cookie_name]
 
-    client.cookies.set(cookie_name, original + "tampered")
+    # Remove all existing cookies so the original valid
+    # cookie cannot accidentally be sent alongside
+    # the tampered cookie.
+    client.cookies.clear()
+
+    # Send only the modified session cookie.
+    client.cookies.set(
+        cookie_name,
+        original + "tampered",
+    )
 
     response = client.get("/api/groups")
+
     assert response.status_code == 401
+
 
 
 def test_session_identity_cannot_be_overridden(client):

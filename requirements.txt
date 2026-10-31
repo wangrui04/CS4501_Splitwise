@@ -7,3 +7,4 @@ httpx
 hypothesis
 anthropic
 python-dotenv
+itsdangerous

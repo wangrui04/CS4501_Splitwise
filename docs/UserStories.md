@@ -3,16 +3,14 @@
 
 ## Core Hypothesis
 
-Our AI expense assistant can generate an accurate expense
-split within 5 user prompts in at least 90% of test attempts,
-across varying levels of complexity.
+Our AI expense assistant can generate an accurate expense split within 5 user prompts in at least 90% of test attempts, across varying levels of complexity.
 
 ### Validation Criteria
 
-- **Target users:** 10 college students
-- **Test scenarios:** 6 per participant
-- **Total test attempts:** 60
-- **Success threshold:** At least 54 out of 60 attempts must produce accurate expense splits within 5 user prompts.
+- **Testers:** 3 development team members (internal Alpha)
+- **Test scenarios:** 6 per tester
+- **Total test attempts:** 18
+- **Success threshold:** At least 17 out of 18 attempts must produce accurate expense splits within 5 user prompts.
 - **Definition of accuracy:** Every participant's allocated amount must match the expected answer key.
 - **Prompt counting:** Each user message counts as one prompt, including responses to clarification questions and corrections.
 - **Safety guardrail:** No expense is saved until its allocation passes validation and the user confirms it.
@@ -23,6 +21,7 @@ across varying levels of complexity.
 
 ## User Story 1: Equal Expense Splitting
 
+**ID:** US-01  
 **Priority:** P0  
 **Difficulty:** Simple  
 **Labels:** `ai`, `backend`, `testing`
@@ -61,6 +60,7 @@ As a user, I want to describe an expense that is shared equally among group memb
 
 ## User Story 2: Splitting an Expense Between Selected Members
 
+**ID:** US-02  
 **Priority:** P0  
 **Difficulty:** Simple  
 **Labels:** `ai`, `backend`, `testing`
@@ -101,6 +101,7 @@ As a user, I want to specify which group members participated in an expense so t
 
 ## User Story 3: Itemized Splitting With Different Participants
 
+**ID:** US-03  
 **Priority:** P0  
 **Difficulty:** Moderate  
 **Labels:** `ai`, `backend`, `testing`
@@ -140,6 +141,7 @@ As a user, I want to describe multiple purchased items with different participan
 
 ## User Story 4: Unequal Quantities and Tax/Tip Allocation
 
+**ID:** US-04  
 **Priority:** P0  
 **Difficulty:** Moderate  
 **Labels:** `ai`, `backend`, `testing`
@@ -181,6 +183,7 @@ As a user, I want the AI to account for different quantities purchased and addit
 
 ## User Story 5: Handling Missing and Ambiguous Information
 
+**ID:** US-05  
 **Priority:** P0  
 **Difficulty:** Worst-case  
 **Labels:** `ai`, `backend`, `testing`
@@ -228,43 +231,33 @@ As a user, I want the AI assistant to recognize missing or ambiguous information
 
 ---
 
+## User Story 6: Messy Language, Typos, and Unclear Instructions
 
-## User Story 6: Handling Spelling Errors and Unclear Instructions
-
+**ID:** US-06  
 **Priority:** P0  
 **Difficulty:** Worst-case  
 **Labels:** `ai`, `backend`, `testing`
 
 ### User Story
 
-As a user, I want the AI assistant to understand spelling mistakes
-and clarify unclear instructions so that I can describe expenses
-naturally without needing to phrase everything perfectly.
+As a user, I want the AI assistant to understand spelling mistakes and clarify unclear instructions so that I can describe expenses naturally without needing to phrase everything perfectly.
 
 ### Acceptance Criteria
 
-- [ ] The AI recognizes common spelling errors in item names
-      and expense descriptions.
-- [ ] The AI correctly interprets misspelled group member names
-      when the intended person is unambiguous.
-- [ ] The AI identifies unclear or contradictory splitting
-      instructions.
-- [ ] The AI asks clarification questions instead of making
-      assumptions when the intended meaning is uncertain.
-- [ ] The AI retains previously provided information after
-      receiving clarification.
-- [ ] The AI correctly allocates expenses based on the
-      clarified instructions.
+- [ ] The AI recognizes common spelling errors in item names and expense descriptions.
+- [ ] The AI correctly interprets misspelled group member names when the intended person is unambiguous.
+- [ ] The AI identifies unclear or contradictory splitting instructions.
+- [ ] The AI asks clarification questions instead of making assumptions when the intended meaning is uncertain.
+- [ ] The AI retains previously provided information after receiving clarification.
+- [ ] The AI correctly allocates expenses based on the clarified instructions.
 - [ ] The AI produces an accurate split within 5 user prompts.
-- [ ] The final allocation is validated and displayed for
-      user confirmation before saving.
+- [ ] The final allocation is validated and displayed for user confirmation before saving.
 
 ### Test Scenario
 
 **Prompt 1:**
 
-"I paid for dinr. Me and Kayla shared nachoes for $16.
-Riu got 2 drnks for $5 each. Split the rest evenly."
+"I paid for dinr. Me and Kayla shared nachoes for $16. Riu got 2 drnks for $5 each. Split the rest evenly."
 
 **Expected AI Behavior:**
 
@@ -272,16 +265,12 @@ Riu got 2 drnks for $5 each. Split the rest evenly."
 - Recognizes "nachoes" as "nachos".
 - Recognizes "Riu" as "Rui".
 - Recognizes "drnks" as "drinks".
-- Identifies that "split the rest evenly" is unclear
-  because no additional amount has been specified.
-- Asks for clarification instead of assuming what
-  "the rest" refers to.
+- Identifies that "split the rest evenly" is unclear because no additional amount has been specified.
+- Asks for clarification instead of assuming what "the rest" refers to.
 
 **Expected AI Follow-Up:**
 
-"I understand that Sarah and Kayla shared $16 nachos,
-and Rui had two $5 drinks. When you say 'split the rest
-evenly,' is there another charge to split?"
+"I understand that Sarah and Kayla shared $16 nachos, and Rui had two $5 drinks. When you say 'split the rest evenly,' is there another charge to split?"
 
 **Prompt 2:**
 
@@ -298,9 +287,112 @@ evenly,' is there another charge to split?"
 
 - Payer: Sarah
 - Expected user prompts: 2
-- Expected behavior: The AI interprets the spelling
-  mistakes correctly, clarifies the ambiguous
-  instruction, and generates the correct split.
+- Expected behavior: The AI interprets spelling mistakes correctly, clarifies ambiguous instructions, and generates the correct split.
+
+---
+
+# Supporting Application Features
+
+## User Story 7: Manual Expense Entry
+
+**ID:** US-07  
+**Priority:** P0  
+**Difficulty:** Core UI  
+**Labels:** `frontend`, `backend`, `testing`
+
+### User Story
+
+As a user, I want to enter an expense manually so that I can record a bill without using the AI assistant.
+
+### Acceptance Criteria
+
+- [ ] The user selects a group, description, payer, amount, and participants.
+- [ ] The application calculates each participant's share in integer cents.
+- [ ] The breakdown is previewed before confirmation.
+- [ ] Invalid totals, unknown members, and missing fields are rejected.
+- [ ] Only a confirmed, validated expense is saved to the selected group.
+
+### Test Scenario
+
+Sarah enters a $30.00 dinner for Apartment 4B, paid by Sarah and shared equally by Sarah, Kayla, and Rui.
+
+**Expected Result:**
+
+| Person | Share |
+|---|---:|
+| Sarah | $10.00 |
+| Kayla | $10.00 |
+| Rui | $10.00 |
+| **Total** | **$30.00** |
+
+The expense appears in the group's history only after confirmation.
+
+---
+
+## User Story 8: Name-Based Sign-In
+
+**ID:** US-08  
+**Priority:** P0  
+**Difficulty:** Core UI  
+**Labels:** `frontend`, `backend`, `testing`
+
+### User Story
+
+As a user in the Alpha demo, I want to choose my name from a predefined roster so that the application can identify which groups and expenses belong to me.
+
+### Acceptance Criteria
+
+- [ ] The user can choose a valid demo name from the available group-member roster.
+- [ ] An unknown name is rejected.
+- [ ] A signed session identifies the current user on subsequent requests.
+- [ ] Protected group routes reject requests without a valid session.
+- [ ] The user can log out, invalidating the session.
+
+### Test Scenario
+
+Sarah selects her name and signs in.
+
+**Expected Behavior:**
+
+- Sarah can access her associated demo groups.
+- Unknown names are rejected.
+- Requests without a valid session receive `401 Unauthorized`.
+- After logging out, Sarah can no longer access protected group endpoints.
+
+**Scope Note:** Selecting a name is intended only for internal Alpha testing and is not production-grade authentication.
+
+---
+
+## User Story 9: Group Balances and Expense History
+
+**ID:** US-09  
+**Priority:** P0  
+**Difficulty:** Core UI  
+**Labels:** `frontend`, `backend`, `testing`
+
+### User Story
+
+As a group member, I want to see the expenses and running balances within my group so that I know who paid and how the costs were allocated.
+
+### Acceptance Criteria
+
+- [ ] The user can see groups associated with the current demo session.
+- [ ] Each group's expenses display the description, payer, total, and participants' shares.
+- [ ] The expense history is derived from saved, confirmed expenses.
+- [ ] Running balances use saved allocations and payer amounts.
+- [ ] The displayed balances are consistent with underlying expense records.
+
+### Test Scenario
+
+Sarah pays $30.00 for an equally shared dinner in Apartment 4B.
+
+**Expected Result:**
+
+- Sarah paid $30.00.
+- Sarah's share is $10.00.
+- Kayla's share is $10.00.
+- Rui's share is $10.00.
+- The group balances reflect that Kayla and Rui each owe Sarah $10.00 for this expense.
 
 ---
 
@@ -313,7 +405,10 @@ evenly,' is there another charge to split?"
 | US-03 | Itemized Multi-Way Splitting | Moderate | Item-to-participant mapping |
 | US-04 | Unequal Quantities and Tax/Tip | Moderate | Complex allocation rules |
 | US-05 | Missing and Ambiguous Information | Worst-case | Clarification and context retention |
-| US-06 | Conversational Corrections | Worst-case | Multi-turn correction and validation |
+| US-06 | Messy Language, Typos, and Unclear Instructions | Worst-case | Typo handling and ambiguity clarification |
+| US-07 | Manual Expense Entry | Core UI | Manual input, validation, and confirmation |
+| US-08 | Name-Based Sign-In | Core UI | Demo user sessions and protected routes |
+| US-09 | Group Balances and Expense History | Core UI | Saved expenses and per-person balances |
 
 ---
 
@@ -323,19 +418,28 @@ evenly,' is there another charge to split?"
 
 Evaluate whether the AI expense assistant can generate accurate shared-expense allocations within 5 user prompts at least 90% of the time.
 
+The six primary AI test scenarios correspond to US-01 through US-06. US-07 through US-09 are supporting application features with separate functional tests.
+
 ## Participants
 
-Recruit 10 college students who have experience splitting shared expenses.
+For Alpha Development, the proposed testing scope involves 3 internal team members rather than recruiting 10 external users.
+
+- **Internal testers:** 3 development team members
+- **Test scenarios:** 6 per tester
+- **Total attempts:** 18
+
+External user testing may be conducted during a later development stage, depending on the professor's guidance.
 
 ## Testing Procedure
 
-1. Each participant completes all 6 expense-splitting scenarios.
-2. Participants enter each scenario into the AI assistant.
-3. Participants respond to clarification questions when necessary.
-4. The assistant generates an itemized expense preview.
-5. Compare the allocation against a predefined answer key.
-6. Record the number of user prompts used.
-7. Mark the attempt successful only if the entire allocation is correct within 5 prompts.
+1. Prepare six expense-splitting scenarios and their expected answer keys.
+2. Each team member independently completes all six scenarios using the AI assistant.
+3. Record each user prompt, including clarification responses and corrections.
+4. Compare the AI-generated allocations against the predefined answer keys.
+5. Verify the payer, participants, quantities, total, and individual shares.
+6. Record the number of prompts required to produce a correct split.
+7. Mark an attempt successful only when the entire allocation is accurate within 5 prompts.
+8. Verify that expenses cannot be saved without validation and explicit confirmation.
 
 ## Metrics
 
@@ -344,6 +448,7 @@ Recruit 10 college students who have experience splitting shared expenses.
 Accuracy = (Successful attempts / Total attempts) × 100%
 
 A successful attempt must:
+
 - Produce the correct payer.
 - Correctly identify purchased items and participants.
 - Calculate every participant's share accurately.
@@ -360,20 +465,23 @@ A successful attempt must:
 
 ## Success Threshold
 
-With 10 participants and 6 scenarios each:
+With 3 testers completing 6 scenarios each:
 
-- Total attempts: 60
+- Total attempts: 18
 - Target accuracy: 90%
-- Minimum successful attempts: 54
+- Minimum successful attempts: 17
+- Actual threshold reached with 17 passes: 94.4%
 
-The hypothesis meets its predefined accuracy threshold if at least 54 out of 60 attempts produce completely accurate splits within 5 user prompts.
+The hypothesis meets the predefined accuracy threshold if at least 17 out of 18 attempts produce completely correct splits within 5 user prompts.
 
 ## Limitations
 
-- The study involves only 10 participants.
-- Repeated scenarios may not represent the full variety of real-world expenses.
-- Results may vary depending on the LLM used and the wording of user inputs.
-- The findings provide preliminary evidence rather than proof of general accuracy.
+- Testing involves only 3 internal team members.
+- Team members already understand the application's intended behavior.
+- Repeated scenarios may not represent the variety of real-world expenses.
+- Results may vary depending on the LLM and wording of user inputs.
+- Mocked LLM tests do not count as live AI validation attempts.
+- Findings provide preliminary functional evidence rather than independent user validation.
 
 ---
 

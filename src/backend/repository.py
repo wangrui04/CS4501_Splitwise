@@ -138,6 +138,12 @@ def list_expenses(db, group_id):
     for row in rows:
         expense = dict(row)
 
+        # Convert SQLite column names to API field names.
+        expense["totalCents"] = expense.pop("total_cents")
+        expense["groupId"] = expense.pop("group_id")
+        expense["payer"] = expense.pop("payer_name")
+        expense["createdBy"] = expense.pop("created_by")
+
         share_rows = db.execute(
             """
             SELECT name, cents

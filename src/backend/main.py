@@ -3,6 +3,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from starlette.middleware.sessions import SessionMiddleware
+from itsdangerous import TimestampSigner, BadSignature
 
 from backend.repository import list_groups, get_group
 
@@ -13,13 +14,6 @@ class Login(BaseModel):
 
 def create_app(db, session_secret):
     app = FastAPI()
-
-    app.add_middleware(
-        SessionMiddleware,
-        secret_key=session_secret,
-        same_site="lax",
-        https_only=False,
-    )
 
     def known_names():
         names = []
@@ -32,6 +26,32 @@ def create_app(db, session_secret):
                     names.append(name)
 
         return names
+
+    # Use the same signer as Starlette's SessionMiddleware.
+    signer = TimestampSigner(str(session_secret))
+
+    def session_cookie_is_valid(request: Request):
+        cookie = request.cookies.get("session")
+
+        if not cookie:
+            return False
+
+        try:
+            # Verify the cookie's cryptographic signature.
+            unsigned = signer.unsign(
+                cookie,
+                max_age=14 * 24 * 60 * 60,
+            )
+
+            # Reject any noncanonical cookie representation.
+            # This includes appended text that might otherwise
+            # be accepted by the signature decoder.
+            return (
+                signer.sign(unsigned).decode("utf-8") == cookie
+            )
+
+        except (BadSignature, ValueError, UnicodeError):
+            return False
 
     @app.middleware("http")
     async def protect(request: Request, call_next):
@@ -48,21 +68,40 @@ def create_app(db, session_secret):
             and path not in public_routes
         )
 
-        # GET /api/session and DELETE /api/session
-        # are handled by their own endpoints.
+        # GET and DELETE /api/session handle sessions themselves.
         if path == "/api/session":
             requires_session = False
 
         if requires_session:
+            # Reject missing, expired, or modified cookies.
+            if not session_cookie_is_valid(request):
+                return JSONResponse(
+                    status_code=401,
+                    content={
+                        "detail": "Invalid or missing session"
+                    },
+                )
+
             name = request.session.get("name")
 
             if name not in known_names():
                 return JSONResponse(
                     status_code=401,
-                    content={"detail": "Sign in required"},
+                    content={
+                        "detail": "Sign in required"
+                    },
                 )
 
         return await call_next(request)
+
+    # Register SessionMiddleware last so that it runs first.
+    # This initializes request.session before protect() uses it.
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key=session_secret,
+        same_site="lax",
+        https_only=False,
+    )
 
     @app.get("/health")
     def health():
